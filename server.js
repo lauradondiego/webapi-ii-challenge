@@ -107,52 +107,52 @@ server.get("/api/posts/:id", (req, res) => {
 
 // step 5
 // Returns an array of all the comment objects associated with the post with the specified id.
-server.get("/api/posts/:id/comments", (req, res) => {
-  const id = req.params.id;
-  console.log("comments id", id);
-  if (id) {
-    db.findPostComments(id)
-      .then(comments => {
-        console.log(comments);
-        res.status(200).json({ api: "get request working", comments });
-      })
-      .catch(error => {
-        res.send(500).json({
-          error: "The comments information could not be retrieved."
-        });
-      });
-  } else {
-    res.status(404).json({
-      message: "The post with the specified ID does not exist."
-    });
-  }
-});
 // server.get("/api/posts/:id/comments", (req, res) => {
-//     const { id } = req.params;
-//     console.log(id);
-//     db.findById(id)
-//       .then(post => {
-//         if (post.length) {
-//           db.findPostComments(id)
-//             .then(comments => {
-//               if (comments.length) {
-//                 res.status(200).json(comments);
-//               } else {
-//                 res
-//                   .status(404)
-//                   .json({ error: `comments for post ${id} not found` });
-//               }
-//             })
-//             .catch(err => res.status(500).json(err.message));
-//         } else {
-//           res
-//             .status(404)
-//             .json({ error: `no post with id: ${id} found in the database` });
-//         }
+//   const id = req.params.id;
+//   console.log("comments id", id);
+//   if (id) {
+//     db.findPostComments(id)
+//       .then(comments => {
+//         console.log(comments);
+//         res.status(200).json({ api: "get request working", comments });
 //       })
-//       .catch(err => res.status(500).json(err.message));
-//   });
-//this below code works too but the above code is much simpler
+//       .catch(error => {
+//         res.send(500).json({
+//           error: "The comments information could not be retrieved."
+//         });
+//       });
+//   } else {
+//     res.status(404).json({
+//       message: "The post with the specified ID does not exist."
+//     });
+//   }
+// });
+server.get("/api/posts/:id/comments", (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  db.findById(id)
+    .then(post => {
+      if (post.length) {
+        // cant do if(post) bc still returns true even if array empty, arrays will always be truthy
+        db.findPostComments(id)
+          .then(comments => {
+            if (comments.length) {
+              res.status(200).json(comments);
+            } else {
+              res
+                .status(404)
+                .json({ error: `comments for post ${id} not found` });
+            }
+          })
+          .catch(err => res.status(500).json(err.message));
+      } else {
+        res
+          .status(404)
+          .json({ error: `no post with id: ${id} found in the database` });
+      }
+    })
+    .catch(err => res.status(500).json(err.message));
+});
 
 // step 6
 // Removes the post with the specified id and returns the deleted post object
@@ -210,7 +210,8 @@ server.put("/api/posts/:id", (req, res) => {
       })
       .catch(error => {
         res.send(500).json({
-          error: "The user information could not be modified."
+          error: "The user information could not be modified.",
+          serverEror: error
         });
       });
   }
